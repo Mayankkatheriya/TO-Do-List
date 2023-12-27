@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
+import List from "./List";
+import ColorInput from "./ColorInput";
 
 const Main = () => {
   const [listData, setListData] = useState(
@@ -10,6 +12,7 @@ const Main = () => {
   const [backgroundColorCode, setColorCode] = useState("#000000");
   const [textColorCode, setTextColorCode] = useState("#ffffff");
 
+  //TODO Toastr Options
   toastr.options = {
     closeButton: true,
     debug: false,
@@ -28,9 +31,10 @@ const Main = () => {
     hideMethod: "fadeOut",
   };
 
+  //Todo Add List item to the container
   const addToData = () => {
     if (inputVal.trim() === "") {
-      toastr.error("Please enter some value!")
+      toastr.error("Please enter some value!");
       setInputVal("");
       return;
     }
@@ -50,6 +54,7 @@ const Main = () => {
     setInputVal("");
   };
 
+  //Todo Handle CheckBox
   const hadleCheck = (id) => {
     let newData = listData.map((item) => {
       if (item.id === id) {
@@ -61,21 +66,25 @@ const Main = () => {
         return item;
       }
     });
-    toastr.info("List Updated")
+    toastr.info("List Updated");
     localStorage.setItem("data", JSON.stringify(newData));
     setListData(newData);
   };
 
+  //TODO Remove list item from data
   const removeList = (id) => {
-    toastr.warning("Item Removed")
+    toastr.warning("Item Removed");
     let newData = listData.filter((item) => item.id !== id);
     localStorage.setItem("data", JSON.stringify(newData));
     setListData(newData);
   };
 
+
+  //Todo render to UI
   return (
     <main>
       <h1>Grocery Bud</h1>
+      {/* Item Input and Add Butto */}
       <div className="list-input">
         <div className="text-input">
           <input
@@ -94,64 +103,38 @@ const Main = () => {
               <path
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                strokeWidth="2"
                 d="M12 22V2M2 12h20"
               />
             </svg>
           </button>
         </div>
-        <div className="color-input">
-          <label htmlFor="background">BackGround Color: </label>
-          <input
-            type="color"
-            id="background"
-            value={backgroundColorCode}
-            onChange={(e) => setColorCode(e.target.value)}
-          />
-        </div>
-        <div className="color-input">
-          <label htmlFor="text">Text Color: </label>
-          <input
-            type="color"
-            id="text"
-            value={textColorCode}
-            onChange={(e) => setTextColorCode(e.target.value)}
-          />
-        </div>
+        {/* BackGroud Color Input */}
+        <ColorInput
+          title="BackGround Color: "
+          id="background"
+          value={backgroundColorCode}
+          onClick={(e) => setColorCode(e.target.value)}
+        />
+        {/* Text Color Input */}
+        <ColorInput
+          title="Text Color: "
+          id="text"
+          value={textColorCode}
+          onClick={(e) => setTextColorCode(e.target.value)}
+        />
       </div>
+      {/* List Rendering */}
       <div className="list-container">
         {listData.map((item, index) => {
           return (
-            <div
-              className="list"
-              style={{ backgroundColor: item.backgroundColor }}
+            <List
               key={item.id}
-            >
-              <span
-                style={{
-                  color: item.textColor,
-                  textDecoration: item.checked
-                    ? `line-through ${item.backgroundColor} solid 3px`
-                    : "none",
-                }}
-              >
-                {index + 1}. {item.itemName}
-              </span>
-              <div className="btn-container">
-                <input
-                  style={{ accentColor: item.textColor }}
-                  type="checkbox"
-                  checked={item.checked}
-                  onChange={() => hadleCheck(item.id)}
-                />
-                <button onClick={() => removeList(item.id)}>
-                  <i
-                    style={{ color: item.textColor }}
-                    class="bx bxs-trash-alt"
-                  ></i>
-                </button>
-              </div>
-            </div>
+              item={item}
+              index={index}
+              handleCheckbox={() => hadleCheck(item.id)}
+              handleRemove={() => removeList(item.id)}
+            />
           );
         })}
       </div>
