@@ -1,14 +1,18 @@
 import React, { useState } from "react";
 
 const Main = () => {
-  const [listData, setListData] = useState([]);
+  const [listData, setListData] = useState(
+    JSON.parse(localStorage.getItem("data")) || []
+  );
   const [inputVal, setInputVal] = useState("");
+  const [backgroundColorCode, setColorCode] = useState("#000000")
+  const [textColorCode, setTextColorCode] = useState("#ffffff")
 
   const addToData = () => {
     if (inputVal.trim() === "") {
-        alert("Please enter some value!");
-        setInputVal("");
-        return;
+      alert("Please enter some value!");
+      setInputVal("");
+      return;
     }
     let newData = [
       ...listData,
@@ -16,10 +20,13 @@ const Main = () => {
         itemName: inputVal,
         id: Date.now(),
         checked: false,
+        backgroundColor: backgroundColorCode,
+        textColor: textColorCode
       },
     ];
+    localStorage.setItem("data", JSON.stringify(newData));
     setListData(newData);
-    setInputVal("")
+    setInputVal("");
   };
 
   const hadleCheck = (id) => {
@@ -33,35 +40,73 @@ const Main = () => {
         return item;
       }
     });
+    localStorage.setItem("data", JSON.stringify(newData));
     setListData(newData);
   };
 
   const removeList = (id) => {
-    setListData(listData.filter((item) => item.id !== id));
-  }
+    let newData = listData.filter((item) => item.id !== id);
+    localStorage.setItem("data", JSON.stringify(newData));
+    setListData(newData);
+  };
 
   return (
     <main>
       <h1>Grocery Bud</h1>
       <div className="list-input">
+       <div className="text-input">
         <input
-          type="text"
-          value={inputVal}
-          onChange={(e) => setInputVal(e.target.value)}
-        />
-        <button onClick={addToData}>add</button>
+            type="text"
+            placeholder="Enter Item"
+            value={inputVal}
+            onChange={(e) => setInputVal(e.target.value)}
+          />
+          <button onClick={addToData}>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                d="M12 22V2M2 12h20"
+              />
+            </svg>
+          </button>
+       </div>
+       <div className="color-input">
+        <label htmlFor="background">BackGround Color: </label>
+        <input type="color" id="background" value={backgroundColorCode} onChange={(e) => setColorCode(e.target.value)} />
+       </div>
+       <div className="color-input">
+        <label htmlFor="text">Text Color: </label>
+        <input type="color" id="text" value={textColorCode} onChange={(e) => setTextColorCode(e.target.value)} />
+       </div>
       </div>
       <div className="list-container">
-        {listData.map((item) => {
+        {listData.map((item, index) => {
           return (
-            <div className="list" key={item.id}>
+            <div className="list" style={{backgroundColor: item.backgroundColor}} key={item.id}>
+              <span
+                style={{
+                  color: item.textColor,
+                  textDecoration: item.checked ? `line-through ${item.backgroundColor} solid 3px` : "none"
+                }}
+              >
+                {index+1}. {item.itemName}
+              </span>
+              <div className="btn-container">
               <input
+                style={{accentColor: item.textColor}}
                 type="checkbox"
                 checked={item.checked}
                 onChange={() => hadleCheck(item.id)}
               />
-              <span style={{textDecoration: (item.checked) ? "line-through" : "none"}}>{item.itemName}</span>
-              <button onClick={() => removeList(item.id)}>remove</button>
+                <button onClick={() => removeList(item.id)}><i style={{color: item.textColor}} class='bx bxs-trash-alt'></i></button>
+              </div>
             </div>
           );
         })}
